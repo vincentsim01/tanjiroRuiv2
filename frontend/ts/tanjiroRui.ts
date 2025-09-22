@@ -26,6 +26,8 @@ let webCounter:number = 0;
 let webSlashedCounter:number = 0;
 let duelLevel:number = 1;
 
+const backendUrl = 'localhost:3500'
+
 interface Player {
   name: string;
   level: number;
@@ -70,7 +72,7 @@ function render() {
   });
 }
 
-addBtn.onclick = () => {
+addBtn.onclick = async () => {
   const name = nameInput.value.trim();
   const level = duelLevel;
   const webPassed = webCounter;
@@ -85,11 +87,34 @@ addBtn.onclick = () => {
 
   players.push({ name, level, webPassed, webSlashed });
   render();
-  console.log(players);
+
+  const newPlayer = { name, level, webPassed, webSlashed };
+  
+  // players.push(newPlayer);
+ 
+  try {
+    const res = await fetch(`/uploadplayer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(newPlayer)
+    });
+
+    if (!res.ok) {
+      throw new Error(`Server error: ${res.status}`);
+    }
+
+    const data = await res.json();
+    console.log('Server response:', data);
+
+  } catch (err) {
+    console.error('Upload failed:', err);
+  }
 
   nameInput.value = "";
   addBtn.classList.add('hidden');
-  // scoreInput.value = "";
+
 };
 
 
